@@ -1,5 +1,4 @@
-# ***Proyecto Investigativo Final***
-
+# ***Proyecto Investigativo Final***      
 ### *¿Qué es el MAIS-CE?* 
 
 *El Manual de Atención Integral en Salud en Contextos Educativos (MAIS-CE) es una propuesta de intervención en el sistema educativo, basados en aspectos de salud, mismo que implica la coordinación intersectorial entre los Ministerios a fin de garantizar la salud; y, el correcto desarrollo y crecimiento de la población estudiantil del país.*  
@@ -17,8 +16,8 @@
 <p align="center">
   <img src="Imagenes/Manza..jpg" alt="alt text" width="600"/>
 </p>
-
+ 
 
 #
-#### ***Ec. Clemente Pincay Odalis*** 
+#### ***Ec. Clemente Pincay Odalis***  
 #
