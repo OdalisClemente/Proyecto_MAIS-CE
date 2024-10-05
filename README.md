@@ -9,7 +9,7 @@ completo bienestar*
 - [MAIS-CE](Propuesta)  
 #
 
-<div style="text-align: center;">
-    <img src="Imagenes/Manza..jpg" alt="alt text" width="400"/>
-</div> 
+<div style="display: flex; justify-content: center;">
+    <img src="Imagenes/Manza..jpg" alt="alt text" width="450"/>
+</div>
 
