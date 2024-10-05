@@ -6,4 +6,4 @@ población estudiantil, a través de actividades articuladas de promoción de la
 salud y prevención de enfermedades, que contribuyan a alcanzar un estado de
 completo bienestar* 
 
-- [MAIS-CE](Propuesta) 
+- [MAIS-CE](Propuesta)  
