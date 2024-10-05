@@ -10,8 +10,9 @@
 *Mejorar la calidad de vida de la población estudiantil a través de una gestión en salud integral y sostenible, orientada al óptimo desarrollo de sus capacidades y a la promoción y prevención de salud en el entorno escolar.*
 
 #
-### *Reglamento:* - [*MAIS-CE*](Propuesta) 
-
+### *Reglamento:* 
+- [*MAIS-CE*](Propuesta) 
+#
 
 <p align="center">
   <img src="Imagenes/Manza..jpg" alt="alt text" width="600"/>
