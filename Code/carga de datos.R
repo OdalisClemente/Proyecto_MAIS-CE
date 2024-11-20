@@ -7,3 +7,6 @@ ineval_2015_2016_raw <- read_sav("Data/INEVAL/SBAC16_micro_266442_20200130_SAV.s
 
 
 juntar <- bind_rows(ineval_2014_2015_raw, ineval_2015_2016_raw)
+
+
+revison de datos 
