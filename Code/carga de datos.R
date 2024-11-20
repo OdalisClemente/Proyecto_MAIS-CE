@@ -1,12 +1,19 @@
 library(haven)
+library(readxl)
 library(dplyr)
 
-ineval_2014_2015_raw <- read_sav("Data/INEVAL/SBAC15_micro_246169_20200130_SAV.sav")
+################################################################################
 
-ineval_2015_2016_raw <- read_sav("Data/INEVAL/SBAC16_micro_266442_20200130_SAV.sav")
+# Datos de las Escuelas ---------------------------------------------------
 
+Mais <- read_excel("Data/MINEDUC/IE_Adscritas_Nacional.xlsx")
 
-juntar <- bind_rows(ineval_2014_2015_raw, ineval_2015_2016_raw)
+# Datos del ineval --------------------------------------------------------
 
+X2015 <- read_sav("Data/MINEDUC/2015.sav")
+X2016 <- read_sav("Data/MINEDUC/2016.sav")
+X2017 <- read_sav("Data/MINEDUC/2017.sav")
+X2018 <- read_sav("Data/MINEDUC/2018.sav")
+X2019 <- read_sav("Data/MINEDUC/2019.sav")
+X2020 <- read_sav("Data/MINEDUC/2020.sav")
 
-revison de datos 
