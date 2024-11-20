@@ -1,6 +1,12 @@
-library(haven)
-library(readxl)
+# Cargar las librerías necesarias
+library(readxl) 
 library(dplyr)
+library(ggplot2)
+library(ggthemes) 
+library(tidyverse)
+library(janitor)
+library(haven)
+
 
 # Datos de las Escuelas ---------------------------------------------------
 
