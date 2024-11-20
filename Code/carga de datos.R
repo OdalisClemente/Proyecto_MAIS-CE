@@ -2,8 +2,6 @@ library(haven)
 library(readxl)
 library(dplyr)
 
-################################################################################
-
 # Datos de las Escuelas ---------------------------------------------------
 
 Mais <- read_excel("Data/MINEDUC/IE_Adscritas_Nacional.xlsx")
