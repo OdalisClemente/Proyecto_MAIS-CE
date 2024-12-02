@@ -75,6 +75,8 @@ X2018 <- read_sav("Data/MINEDUC/2018.sav")%>%
   janitor::clean_names()
 X2019 <- read_sav("Data/MINEDUC/2019.sav")%>% 
   janitor::clean_names()
+#X2020 <- read_sav("Data/MINEDUC/2020.sav")%>% 
+#  janitor::clean_names()
 
 # Añadir una columna de año para identificar cada conjunto de datos
 X2015 <- X2015 %>% mutate(anio = 2015)
@@ -82,6 +84,7 @@ X2016 <- X2016 %>% mutate(anio = 2016)
 X2017 <- X2017 %>% mutate(anio = 2017)
 X2018 <- X2018 %>% mutate(anio = 2018)
 X2019 <- X2019 %>% mutate(anio = 2019)
+#X2020 <- X2019 %>% mutate(anio = 2020)
 
 # Unir todas las bases en una sola
 Datos_Unidos <- bind_rows(X2015, X2016, X2017, X2018, X2019)
@@ -93,6 +96,13 @@ Base <- Datos_Unidos %>%
 #-------------------------------------------------------------------------------
 # Limpieza de Valores (NA) -----------------------------------------------------
 #-------------------------------------------------------------------------------
+
+sum(is.na(Base$amie))  #  Libre de valores NA 
+
+Base <- Base %>%
+  mutate(amie = as.character(amie)) %>%  # Convertir 'amie' a tipo character
+  filter(amie != "999999")               # Eliminar filas con amie igual a "999999"
+
 
 # Regiones (Costa, Sierra, Oriente, etc.)
 sum(is.na(Base$nm_regi))  #  Libre de valores NA 
@@ -206,16 +216,15 @@ Base <- Base %>%
       labels = c("Insuficiente" = 0, "Elemental" = 1, "Satisfactorio" = 2, "Excelente" = 3, "Desconocido" = 4)))
 
 # Verificar valores 
-lapply(Base, unique)   
+lapply(Base, unique) 
+
 # Verificar si existen valores NA en toda la base de datos
 any(is.na(Base))
 
 
 # JOINS -------------------------------------------------------------------
 
-
 # Base y Mais 
-
 
 # Crear la variable 'intervencion' en la base Mais
 Mais <- Mais %>%
@@ -225,33 +234,71 @@ Mais <- Mais %>%
 Base <- Base %>%
   mutate(intervencion = 0)  # En Base, todas las escuelas inicialmente tendrán valor 0
 
-# Unir las dos bases por la variable 'amie'
+# Unir las dos bases y consolidar la variable 'intervencion' en una sola columna
 Base_Final <- Base %>%
   left_join(Mais %>%
-              select(amie, intervencion), by = "amie")  # Solo se une la columna 'amie' y 'intervencion' de Mais
-
-# Verifica el resultado
-head(Base)
-
+              select(amie, intervencion), by = "amie") %>%
+  mutate(intervencion = ifelse(!is.na(intervencion.y), 1, intervencion.x)) %>%
+  select(-intervencion.x, -intervencion.y)  # Eliminar columnas redundantes
 
 
-
+any(is.na(Base_Final)) # Ver si posee la base valores NA
 
 
 
+# Descriptivos ------------------------------------------------------------
+
+# Crear un resumen del número de escuelas por año y por intervención
+data_resumen <- Base_Final %>%
+  group_by(anio, intervencion) %>%
+  summarise(amie = n(), .groups = "drop")  # Contar las escuelas
+
+data_resumen
+
+# Generar el gráfico con ggplot2
+ggplot(data_resumen, aes(x = as.factor(anio), y = amie, fill = as.factor(intervencion))) +
+  geom_bar(stat = "identity", position = "dodge") +  # Barras agrupadas
+  labs(
+    title = "Número de escuelas con y sin intervención por año",
+    x = "Año",
+    y = "Número de escuelas",
+    fill = "Intervención\n(0 = No, 1 = Sí)"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("0" = "purple", "1" = "green"))  # Colores personalizados
 
 
 
-#-------------------------------------------------------------------------------
-# Joins ------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-# Realizar el full join para combinar ambas tablas
-base_combinada <- full_join(Base, Mais, by = "amie")
 
-# Crear una nueva columna que indique si la escuela es intervenida o no
-# Si la escuela aparece en "Mais", se considera intervenida (1); si no, no intervenida (0)
-base_combinada <- base_combinada %>%
-  mutate(intervenida = ifelse(!is.na(intervenida) | !is.na(tipo_intervencion), 1, 0))
+# Generar el gráfico de evolución
+ggplot(data_resumen, aes(x = anio, y = amie, color = as.factor(intervencion), group = intervencion)) +
+  geom_line(size = 1.2) +  # Añadir líneas
+  geom_point(size = 3) +   # Añadir puntos para resaltar valores
+  labs(
+    title = "Evolución del número de escuelas con y sin intervención (2015-2019)",
+    x = "Año",
+    y = "Número de escuelas",
+    color = "Intervención\n(0 = No, 1 = Sí)"
+  ) +
+  theme_minimal() +
+  scale_color_manual(values = c("0" = "purple", "1" = "green")) +  # Colores personalizados
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    legend.position = "top"
+  )
 
-# Revisar las primeras filas del resultado
-head(base_combinada)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
