@@ -82,7 +82,6 @@ X2019 <- read_sav("Data/MINEDUC/2019.sav") %>%
 X2020 <- read_sav("Data/MINEDUC/2020.sav") %>% 
   janitor::clean_names()
 
-
 # Añadir una columna de año para identificar cada conjunto de datos
 X2015 <- X2015 %>% mutate(anio = 2015)
 X2016 <- X2016 %>% mutate(anio = 2016)
@@ -90,11 +89,6 @@ X2017 <- X2017 %>% mutate(anio = 2017)
 X2018 <- X2018 %>% mutate(anio = 2018)
 X2019 <- X2019 %>% mutate(anio = 2019)
 X2020 <- X2020 %>% mutate(anio = 2020)
-
-
-
-
-
 
 # Unir todas las bases en una sola
 Datos_Unidos <- bind_rows(X2015, X2016, X2017, X2018, X2019, X2020)
@@ -216,7 +210,8 @@ Base_Modelo <- Base_Final %>%
   mutate(grupo_tratado = ifelse(intervencion == 1, 1, 0),  # Definir grupo tratado independientemente del año
          post_tratamiento = ifelse(anio >= 2018, 1, 0))  # Identificar periodo post-tratamiento
 
-###################################################################
+#########################################
+#########################################
 
 # Modelo de diferencias en diferencias con efectos fijos -------------------------
 
@@ -224,11 +219,9 @@ modelo <- feols( inev ~ grupo_tratado + financiamiento   +quintil|  anio + id_pr
 msummary(modelo, stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01),gof_omit = 'DF|R2|Log.Lik') # omite metricas innecesarias 
 
 
-
-
-
-
 #########################################
+#########################################
+
 # Filtrar datos antes del tratamiento
 Base_PreTratamiento <- Base_Modelo %>% filter(anio < 2018)
 # Ajustar el modelo de regresión
