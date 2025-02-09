@@ -14,6 +14,7 @@ library(labelled)
 library(lfe)  
 library(modelsummary)
 library(fixest)
+library(ggfixest)
 
 #-------------------------------------------------------------------------------
 # Base de Datos de las Escuelas que formaron parte del proyecto ----------------
@@ -194,18 +195,15 @@ Base_Escuelas <- Base_Escuelas %>%
 Base_Modelo <- Base_Escuelas %>%
   mutate(tratada = ifelse(intervencion == 1 & anio >= 2018, 1, 0))
 
-
-
-
 #-------------------------------------------------------------------------------
 # Modelo de Diferencias en Diferencias con Efectos Fijos  ----------------------
 #-------------------------------------------------------------------------------
 
 # Modelo 1: Efectos fijos por 'amie' y 'anio'
+
 modelo_1 <- feols(log_promedio_calif ~ tratada | amie + anio, cluster = ~ amie + anio , data = Base_Modelo)
 msummary(modelo_1, stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01), gof_omit = 'DF|R2|Log.Lik')
 summary(modelo_1)
-
 
 # Modelo 2: Agregando Todas las variables 
 modelo_2 <- feols(log_promedio_calif ~ tratada  + num_estud  + prop_quintil_bajo 
@@ -215,16 +213,12 @@ modelo_2 <- feols(log_promedio_calif ~ tratada  + num_estud  + prop_quintil_bajo
 msummary(modelo_2, stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01), gof_omit = 'DF|R2|Log.Lik') # omite métricas innecesarias
 summary(modelo_2)
 
-
 # Modelo 3: Agregando todas dejando solo un quintil 
 modelo_3 <- feols(log_promedio_calif ~ tratada  + num_estud  + prop_quintil_bajo + prop_mujeres 
                   + prop_deshonestidad + promedio_na_eano + prop_discapacidad
                   |amie + anio, cluster = ~ amie + anio, data = Base_Modelo)
 msummary(modelo_3, stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01), gof_omit = 'DF|R2|Log.Lik') # omite métricas innecesarias
 summary(modelo_3)
-
-
-
 
 #-------------------------------------------------------------------------------
 # Análisis Exploratorio: Tendencias Paralelas y Placebo   ------------------------
@@ -249,7 +243,6 @@ ggplot(calificaciones_promedio, aes(x = anio, y = promedio_calificaciones, color
   scale_color_manual(values = c("0" = "red", "1" = "green")) +  # Colores específicos
   theme_minimal()  # Estilo de gráfica
 
-
 ######## Placebo
 
 # Filtrar datos previos al tratamiento real (2015-2017)
@@ -273,24 +266,56 @@ modelo_placebo <- feols(log_promedio_calif ~ tratamiento_falso + num_estud  + pr
 msummary(modelo_placebo, stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01), gof_omit = 'DF|R2|Log.Lik') 
 summary(modelo_placebo)
 
-
 #-------------------------------------------------------------------------------
 # Efectos a Largo Plazo: Tratamiento Dinámico ---------------------------------
 #-------------------------------------------------------------------------------
 
-# Crear variable de tiempo centrada
-Base_Modelo <- Base_Escuelas %>%
-  mutate(tratada = ifelse(intervencion == 1 & anio >= 2018, 1, 0),
-         tiempo_centrado = anio - 2018)  # Ajusta 2018 según sea necesario
+# Crear dummy (True or false) para el tratamiento en cada año
 
-# Variables indicadoras para cada período de tiempo relativo
-Base_Modelo <- Base_Modelo %>%
-  mutate(across(tiempo_centrado, ~ factor(.)))
+Base_Modelo <-
+  Base_Escuelas %>%
+  mutate(tratamiento_logica = (intervencion == 1),
+         periodos = anio - 2018)  # Ajustar 2018 según sea necesario
+
+# verificar que "intervencion" sea la participacion en MAIS-CE.
+# verificar que 2018 sea el anio de intervencion
 
 # Modelo de efectos de tratamiento dinámico con efectos fijos
-modelo_dinamico <- feols(log_promedio_calif ~ i(tiempo_centrado, tratada, ref = -1) | amie + anio, 
-                         cluster = ~ amie + anio, data = Base_Modelo)
+
+modelo_dinamico <- 
+  feols(log(promedio_calif) ~ i(periodos, tratamiento_logica, ref = -1) | amie + anio, 
+        cluster = ~ amie + anio, data = Base_Modelo)
+
 msummary(modelo_dinamico, stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01), gof_omit = 'DF|R2|Log.Lik')
-summary(modelo_dinamico)
-coefplot(modelo_dinamico, main = "Efectos Dinámicos")
+
+# grafico
+
+ggiplot(modelo_dinamico, 
+        geom_style= "errorbar",
+        multi_style = "facet",
+        ci.width = 0,
+        pt.pch = 1,
+        facet_args = list(ncol = 1, scales = "free_y")) +
+  theme_bw()
+
+# repetir con controles
+
+modelo_dinamico_controles <- 
+  feols(log(promedio_calif) ~ i(periodos, tratamiento_logica, ref = -1) + num_estud  + prop_quintil_bajo 
+        + prop_quintil_medio + prop_quintil_alto + prop_mujeres 
+        + prop_deshonestidad + promedio_na_eano + prop_discapacidad | amie + anio, 
+  cluster = ~ amie + anio, data = Base_Modelo)
+
+msummary(modelo_dinamico_controles, stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01), gof_omit = 'DF|R2|Log.Lik')
+
+# grafico
+
+ggiplot(modelo_dinamico_controles, 
+        geom_style= "errorbar",
+        multi_style = "facet",
+        ci.width = 0,
+        pt.pch = 1,
+        facet_args = list(ncol = 1, scales = "free_y")) +
+  theme_bw() 
+
 
